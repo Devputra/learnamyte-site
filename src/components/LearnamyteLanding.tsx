@@ -73,6 +73,17 @@ function LearnamyteLanding() {
   const [loading, setLoading] = useState(false);
 const [msg, setMsg] = useState<string | null>(null);
 
+type ApiResponse = { ok: boolean; error?: string };
+
+function isApiResponse(x: unknown): x is ApiResponse {
+  return (
+    typeof x === "object" &&
+    x !== null &&
+    "ok" in x &&
+    typeof (x as Record<string, unknown>).ok === "boolean"
+  );
+}
+
 async function handleSubscribe(e: React.FormEvent) {
   e.preventDefault();
   setMsg(null);
@@ -85,24 +96,23 @@ async function handleSubscribe(e: React.FormEvent) {
       body: JSON.stringify({ email }),
     });
 
-    // Read text, then try JSON to avoid parse crashes
+    // Read as text, then parse (avoids JSON parse crash on HTML errors)
     const text = await res.text();
-    let data: unknown = null;
+    let parsed: unknown = null;
     try {
-      data = JSON.parse(text);
+      parsed = JSON.parse(text);
     } catch {
-      data = null;
+      parsed = null;
     }
 
-    const ok = typeof data === "object" && data !== null && "ok" in data && (data as any).ok === true;
-    const error =
-      typeof data === "object" && data !== null && "error" in data ? (data as any).error : undefined;
+    const payload: ApiResponse | null = isApiResponse(parsed) ? parsed : null;
 
-    if (res.ok && ok) {
+    if (res.ok && payload?.ok) {
       setMsg("You're on the list! Check your inbox.");
       setEmail("");
     } else {
-      setMsg(error || `Request failed (${res.status})`);
+      const errMsg = payload?.error || `Request failed (${res.status})`;
+      setMsg(errMsg);
     }
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Network error.";
