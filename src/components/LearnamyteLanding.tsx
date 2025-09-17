@@ -84,15 +84,29 @@ async function handleSubscribe(e: React.FormEvent) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email }),
     });
-    const data = await res.json();
-    if (data.ok) {
+
+    // Read text, then try JSON to avoid parse crashes
+    const text = await res.text();
+    let data: unknown = null;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      data = null;
+    }
+
+    const ok = typeof data === "object" && data !== null && "ok" in data && (data as any).ok === true;
+    const error =
+      typeof data === "object" && data !== null && "error" in data ? (data as any).error : undefined;
+
+    if (res.ok && ok) {
       setMsg("You're on the list! Check your inbox.");
       setEmail("");
     } else {
-      setMsg(data.error || "Something went wrong.");
+      setMsg(error || `Request failed (${res.status})`);
     }
-  } catch (err: any) {
-    setMsg(err?.message || "Network error.");
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Network error.";
+    setMsg(message);
   } finally {
     setLoading(false);
   }

@@ -9,7 +9,7 @@ export async function POST(req: Request) {
     }
 
     const apiKey = process.env.MAILCHIMP_API_KEY;
-    const dc = process.env.MAILCHIMP_DC;            // e.g. "us21"
+    const dc = process.env.MAILCHIMP_DC;
     const listId = process.env.MAILCHIMP_LIST_ID;
 
     if (!apiKey || !dc || !listId) {
@@ -17,11 +17,15 @@ export async function POST(req: Request) {
     }
 
     const url = `https://${dc}.api.mailchimp.com/3.0/lists/${listId}/members`;
+
+    // Basic auth (recommended by Mailchimp)
+    const basic = Buffer.from(`anystring:${apiKey}`).toString("base64");
+
     const res = await fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `apikey ${apiKey}`,
+        Authorization: `Basic ${basic}`,
       },
       body: JSON.stringify({
         email_address: email,
@@ -31,13 +35,28 @@ export async function POST(req: Request) {
       cache: "no-store",
     });
 
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) {
-      return NextResponse.json({ ok: false, error: data?.detail || "Mailchimp error" }, { status: 400 });
-    }
+const data: unknown = await res.json().catch(() => ({}));
+
+// Narrow error detail if present
+let detail: string | undefined;
+if (typeof data === "object" && data !== null && "detail" in data) {
+  const d = (data as Record<string, unknown>).detail;
+  if (typeof d === "string") {
+    detail = d;
+  }
+}
+
+if (!res.ok) {
+  return NextResponse.json(
+    { ok: false, error: detail || "Mailchimp error" },
+    { status: 400 }
+  );
+}
+
 
     return NextResponse.json({ ok: true });
-  } catch (err: any) {
-    return NextResponse.json({ ok: false, error: err?.message || "Unknown error" }, { status: 500 });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    return NextResponse.json({ ok: false, error: message }, { status: 500 });
   }
 }
