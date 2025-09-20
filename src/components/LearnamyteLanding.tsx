@@ -589,9 +589,9 @@ function LearnamyteLanding() {
                 {/* <Anchor href="/enroll">
                   <Button size="lg" className="gap-2"><Sparkles className="h-4 w-4" aria-hidden /> Enroll today</Button>
                 </Anchor> */}
-                <Anchor href="mailto:team@learnamyte.com?subject=Learnamyte%20Sales%20Inquiry&body=Hello%20Team%2C%0D%0A%0AI%20would%20like%20to%20know%20more%20about%20your%20workshops.">
+                <Anchor href="mailto:team@learnamyte.com?subject=Learnamyte%20Course%20Inquiry&body=Hello%20Team%2C%0D%0A%0AI%20would%20like%20to%20know%20more%20about%20your%20workshops.">
                 <Button size="lg" variant="outline" className="gap-2">
-                  <Mail className="h-4 w-4" aria-hidden /> Talk to sales
+                  <Mail className="h-4 w-4" aria-hidden /> Talk to support
                 </Button>
               </Anchor>
               </div>
