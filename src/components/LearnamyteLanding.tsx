@@ -7,7 +7,7 @@
 
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import {
-  BookOpen, CalendarDays, Users, Sparkles, CheckCircle2, PlayCircle,
+  BookOpen, CalendarDays, Users, Sparkles, CheckCircle2,
   Mail, ArrowRight, BarChart3, Globe2, Zap, Quote, Clock, Award, GraduationCap, ShieldCheck
 } from "lucide-react";
 
@@ -187,7 +187,7 @@ function LearnamyteLanding() {
   const plans = [
     {
       name: "Single Course",
-      price: "₹3,599",
+      price: "₹3,999",
       period: "per course",
       highlights: [
         "Access to one full workshop",
@@ -201,13 +201,13 @@ function LearnamyteLanding() {
     },
     {
       name: "Bundle (2 Courses)",
-      price: "₹5,999",
+      price: "₹6,599",
       period: "one-time",
       highlights: [
         "Choose any 2 courses",
         "Structured learning path",
         "Project feedback from instructors",
-        "Save ₹1,200 vs buying separately",
+        "Save ₹1,500 vs buying separately",
       ],
       // cta: "Get the bundle",
       href: "/enroll/bundle",
@@ -241,14 +241,15 @@ function LearnamyteLanding() {
   //   { name: "Rahul Mehta", role: "Analytics Lead, SaaS", bio: "Built BI at unicorn scale.", avatar: "/instructors/rahul.jpg" },
   // ];
 
-  // ---------------- Dev-only runtime tests (smoke tests) ----------------
+  // Dev-only sanity checks (run once)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (process.env.NODE_ENV === "production") return;
     console.groupCollapsed("[LearnamyteLanding] Dev checks");
 
     // Type guard tests (keep existing)
     console.assert(isApiResponse({ ok: true }), "isApiResponse should accept ok: true");
-    console.assert(!isApiResponse({ ok: "yes" } as any), "isApiResponse should reject non-boolean ok");
+    console.assert(!isApiResponse({ ok: "yes" } as unknown as { ok: boolean }), "isApiResponse should reject non-boolean ok");
 
     // Data shape tests (keep existing)
     console.assert(features.length >= 4, "features should have at least 4 items");
@@ -261,8 +262,14 @@ function LearnamyteLanding() {
 
     // NEW: Environment sanity tests (avoid Next-only modules)
     try {
-      const maybeNext: any = (globalThis as any).next?.dynamic;
-      console.assert(!maybeNext, "Should not rely on next/dynamic in this component");
+      // Safe narrowing without `any`
+        const g = globalThis as unknown as { next?: { dynamic?: unknown } };
+        const hasNextDynamic = Boolean(g.next?.dynamic);
+        console.assert(!hasNextDynamic, "Should not rely on next/dynamic in this component");
+
+        // Type guard test (no `any` cast needed)
+        console.assert(!isApiResponse({ ok: "yes" } as unknown as { ok: boolean }), "isApiResponse should reject non-boolean ok");
+
     } catch {
       // ignore
     }
@@ -285,16 +292,17 @@ function LearnamyteLanding() {
         <Container>
           <div className="flex h-16 items-center justify-between">
             <Anchor
-                href="/"
-                className="flex items-center gap-2 font-bold tracking-tight"
-                aria-label="Learnamyte home">
-                <img
-                  src="/Official_Logo.png"
-                  alt="Learnamyte Logo"
-                  className="h-15 w-15 object-contain"
-                />
-                Learnamyte
-              </Anchor>
+              href="/"
+              className="flex items-center gap-2 font-bold tracking-tight"
+              aria-label="Learnamyte home"
+            >
+              <img
+                src="/Official_Logo.png"
+                alt="Learnamyte Logo"
+                className="h-15 w-15 object-contain"
+              />
+              Learnamyte
+            </Anchor>
             <nav className="hidden items-center gap-6 md:flex" aria-label="Primary">
               <a href="#features" className="text-sm text-muted-foreground hover:text-foreground">Features</a>
               <a href="#catalog" className="text-sm text-muted-foreground hover:text-foreground">Catalog</a>
@@ -455,7 +463,6 @@ function LearnamyteLanding() {
             {/* {instructors.map((ins) => ( */}
               {/* <Card key={ins.name} className="h-full"> */}
                 {/* <CardContent className="flex items-center gap-4 p-6"> */}
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   {/* <img src={ins.avatar} alt="" className="h-14 w-14 rounded-full object-cover" loading="lazy" /> */}
                   {/* <div> */}
                     {/* <div className="font-semibold">{ins.name}</div> */}

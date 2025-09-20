@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Sparkles, Mail, ArrowRight } from "lucide-react";
+import { Sparkles, ArrowRight } from "lucide-react";
 
 export default function ComingSoon() {
   const [email, setEmail] = useState("");
@@ -26,7 +26,7 @@ export default function ComingSoon() {
       } else {
         setMsg(data.error || "Something went wrong.");
       }
-    } catch (err: unknown) {
+    } catch {
       setMsg("Network error, please try again.");
     } finally {
       setLoading(false);
