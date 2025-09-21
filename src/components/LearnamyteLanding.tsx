@@ -163,25 +163,56 @@ function LearnamyteLanding() {
 
   const categories = [
     {
-      title: "Prompt Matters",
-      copy: "Master prompt engineering to unlock the full power of AI tools and workflows.",
-      items: ["Prompt basics", "Advanced prompting", "Use cases", "Hands-on labs"],
+  title: "Prompt Engineering",
+  copy: "Master prompt engineering to unlock the full potential of AI tools and workflows.",
+  items: [
+    "Prompt basics",
+    "Advanced prompting techniques",
+    "Real-world use cases",
+    "Hands-on labs & projects"
+    ]
     },
     {
-      title: "Cooking the Data",
-      copy: "Transform raw data into insights using Microsoft Power BI.",
-      items: ["Data modeling", "Dashboards", "DAX formulas", "Interactive reports"],
+  title: "Power BI",
+  copy: "Transform raw data into insights with Microsoft Power BI.",
+  items: [
+    "Data modeling & cleaning",
+    "Interactive dashboards",
+    "DAX formulas & calculations",
+    "Business-ready reports"
+      ]
     },
     {
-      title: "Data Optimization with Python",
-      copy: "Build optimization tools using Python, pandas, matplotlib, and tkinter.",
-      items: ["Data cleaning", "Pivot tables", "Charts & plots", "GUI apps"],
+  title: "Data Optimization with Python",
+  copy: "Develop complete optimization tools using Python, pandas, and tkinter.",
+  items: [
+    "Pandas for data handling",
+    "Pivot tables & summaries",
+    "Visualization with Matplotlib",
+    "Tkinter for UI design",
+    "Regex for text processing",
+    "OOPs in Python",
+    "SMTP for automation"
+      ]
     },
     {
-      title: "Destruct, Construct & Decorate the Database",
-      copy: "Learn DBMS from fundamentals to practical applications.",
-      items: ["Create tables", "Joins & keys", "Aggregate functions", "Window functions"],
+      title: "SQL and Database",
+      copy: "Learn SQL & DBMS from fundamentals to practical applications.",
+      items: ["Basic queries", "Advance Functions & Joins", "Constraints", "Subqueries", "Transactions", "Indexes, Views & Normalization"],
     },
+    {
+  title: "Fundamentals of Quantum Information and Computing",
+  copy: "Learn quantum computing from the principles of quantum mechanics to hands-on circuits and algorithms.",
+  items: [
+    "Qubits & superposition",
+    "Quantum gates & circuits",
+    "Entanglement & teleportation",
+    "Grover’s & Deutsch–Jozsa algorithms",
+    "Quantum Fourier Transform (QFT)",
+    "Error correction basics",
+    "Intro to Qiskit programming"
+  ]
+},
   ];
 
   const plans = [
@@ -218,9 +249,9 @@ function LearnamyteLanding() {
       price: "Custom",
       period: "contact us",
       highlights: [
-        "Cohorts for your team",
-        "Manager dashboards to track progress",
+        "Understanding the requirements for your team",
         "Private workshops tailored to your needs",
+        "Manager dashboards to track progress",
         "Dedicated support & Q&A",
       ],
       // cta: "Talk to sales",
@@ -230,9 +261,9 @@ function LearnamyteLanding() {
   ];
 
   const faqs = [
-    { q: "When are the classes?", a: "Weekend cohorts run Sat–Sun, 8–10 or 8–11 AM IST for 4–6 weeks." },
+    { q: "When are the classes?", a: "Weekend sessions run Sat–Sun, 8–10 or 8–11 AM IST for 4–6 weeks." },
     { q: "Do I get a certificate?", a: "Yes. Complete the course and Capstone projects to earn a certificate." },
-    { q: "Is there a refund policy?", a: "Full refund before the 2nd live session. Transfers allowed to a later cohort." },
+    { q: "Is there a refund policy?", a: "Full refund before the 2nd live session. Transfers allowed to a later sessions." },
     { q: "Do you provide 24/7 support?", a: "Yes, we provide 24/7 support during the course period." },
   ];
 
@@ -363,7 +394,7 @@ function LearnamyteLanding() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <h3 className="text-lg font-semibold">FOQIC (16 hours)</h3>
+                    <h3 className="text-lg font-semibold">FOQIC (16 hours) @ ₹2999</h3>
                     <p className="text-sm text-muted-foreground">Live session • Q&A • Hands-on labs (Qiskit)</p>
                   </div>
                   <ul className="space-y-2 text-sm">
@@ -558,7 +589,7 @@ function LearnamyteLanding() {
               </CardHeader>
               <CardContent className="space-y-2 text-sm text-muted-foreground">
                 <p>Structured paths with projects and checkpoints.</p>
-                <p>Live cohorts for accountability and feedback.</p>
+                <p>Live sessions for accountability and feedback.</p>
                 <p>Portfolio-ready artifacts to showcase skills.</p>
               </CardContent>
             </Card>
@@ -568,7 +599,7 @@ function LearnamyteLanding() {
               </CardHeader>
               <CardContent className="space-y-2 text-sm text-muted-foreground">
                 <p>Instructor-led live virtual or in-person sessions</p>
-                <p>Private cohorts tailored to your stack and goals.</p>
+                <p>Personal training tailored to your stack and goals.</p>
                 <p>Integrations for LMS exports.</p>
               </CardContent>
             </Card>
