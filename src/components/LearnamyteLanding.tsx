@@ -232,7 +232,7 @@ function LearnamyteLanding() {
     },
     {
       name: "Bundle (2 Courses)",
-      price: "₹6,599",
+      price: "₹6,499",
       period: "one-time",
       highlights: [
         "Choose any 2 courses",
