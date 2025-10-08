@@ -17,7 +17,7 @@ export async function POST(req: Request) {
     }
 
     const url = `https://${dc}.api.mailchimp.com/3.0/lists/${listId}/members`;
-
+    
     // Basic auth (recommended by Mailchimp)
     const basic = Buffer.from(`anystring:${apiKey}`).toString("base64");
 
