@@ -2,7 +2,7 @@
 
 /* eslint-disable @next/next/no-img-element */
 
-import { useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState, useEffect, type ReactNode } from "react";
 import {
   BookOpen, CalendarDays, Users, Sparkles, CheckCircle2,
   Mail, ArrowRight, BarChart3, Globe2, Zap, Quote, Clock, Award, GraduationCap, ShieldCheck
@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import PosterRotator from "@/components/ui/posterrotator";
 
 /* ---------------- Utilities ---------------- */
 
@@ -316,49 +317,14 @@ function LearnamyteLanding() {
             </FadeIn>
 
             <FadeIn delay={150}>
-              <Card className="border-primary/20 shadow-lg" aria-labelledby="upcoming-class-title">
-                <CardHeader>
-                  <CardTitle id="upcoming-class-title" className="flex items-center gap-2 text-base">
-                    <Sparkles className="h-4 w-4" aria-hidden /> Upcoming Class
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <h3 className="text-lg font-semibold">FOQIC (16 hours) @ ₹3999</h3>
-                    <p className="text-sm text-muted-foreground">Live session • Q&A • Hands-on labs (Qiskit)</p>
-                  </div>
-                  <ul className="space-y-2 text-sm">
-                    {[
-                      "Build & simulate quantum circuits",
-                      "Implement Deutsch–Jozsa, Grover, QFT, QPE",
-                      "Explore entanglement, teleportation, error correction",
-                    ].map((t) => (
-                      <li key={t} className="flex items-center gap-2">
-                        <CheckCircle2 className="h-4 w-4 text-primary" aria-hidden /> {t}
-                      </li>
-                    ))}
-                  </ul>
-                  <form onSubmit={handleSubscribe} className="flex flex-col gap-2" aria-label="Notify me form">
-                    <label htmlFor="email" className="sr-only">Email</label>
-                    <Input
-                      id="email"
-                      placeholder="Enter your email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      type="email"
-                      required
-                      autoComplete="email"
-                      aria-required
-                    />
-                    {/* honeypot */}
-                    <input type="text" value={hp} onChange={(e)=>setHp(e.target.value)} className="hidden" tabIndex={-1} aria-hidden />
-                    <Button type="submit" className="gap-2" disabled={loading} aria-busy={loading} aria-live="polite">
-                      {loading ? "Sending..." : <>Notify me <ArrowRight className="h-4 w-4" aria-hidden /></>}
-                    </Button>
-                    {msg && <p className="text-xs text-muted-foreground" role="status">{msg}</p>}
-                  </form>
-                </CardContent>
-              </Card>
+              <Section
+              id="gallery"
+              eyebrow="Visual Highlights"
+              title="Explore Learnamyte"
+              subtitle="A glimpse into our workshops and certifications"
+            >
+              <PosterRotator />
+            </Section>
             </FadeIn>
           </div>
         </Container>
