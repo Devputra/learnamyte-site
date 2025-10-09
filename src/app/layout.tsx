@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "LEARNAMYTE",
-  description: "Created by Appobang",
+  description: "Product of Appobang",
 };
 
 export default function RootLayout({
