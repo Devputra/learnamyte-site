@@ -8,6 +8,8 @@ export default function PosterRotator() {
     { src: "/images/certificate_WM.png", alt: "Learnamyte Certificate Sample" },
     { src: "/images/FOQIC_poster.png", alt: "FOQIC Workshop Poster" },
     { src: "/images/DOP_poster.png", alt: "Data Optimization with Python Poster" },
+    { src: "/images/DASQL_poster.png", alt: "Data Analysis with SQL Poster" },
+    { src: "/images/DVPBI_poster.png", alt: "Data Visualization with Power BI Poster" },
   ];
 
   const [index, setIndex] = useState(0);

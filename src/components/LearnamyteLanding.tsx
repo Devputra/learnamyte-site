@@ -2,103 +2,26 @@
 
 /* eslint-disable @next/next/no-img-element */
 
-import { useMemo, useState, useEffect, type ReactNode } from "react";
+import { useState, useEffect } from "react";
 import {
-  BookOpen, CalendarDays, Users, Sparkles, CheckCircle2,
-  Mail, ArrowRight, BarChart3, Globe2, Zap, Quote, Clock, Award, GraduationCap, ShieldCheck
+  BookOpen, CalendarDays, Users, Sparkles,
+  CheckCircle2, Mail, ArrowRight, BarChart3,
+  Quote, Clock, GraduationCap, ShieldCheck,
+  Phone
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import PosterRotator from "@/components/ui/posterrotator";
+import { Anchor, Container, Section, FadeIn, Badges } from "@/components/LandingPrimitives";
 
-/* ---------------- Utilities ---------------- */
-
-function Anchor(
-  { href = "#", className, children, ...rest }:
-  React.AnchorHTMLAttributes<HTMLAnchorElement>
-) {
-  return (
-    <a href={href} className={className} {...rest}>
-      {children}
-    </a>
-  );
-}
-
-const Container = ({ children }: { children: ReactNode }) => (
-  <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">{children}</div>
-);
-
-const Section = ({
-  id,
-  eyebrow,
-  title,
-  subtitle,
-  children,
-}: {
-  id?: string;
-  eyebrow?: ReactNode;
-  title?: ReactNode;
-  subtitle?: ReactNode;
-  children: ReactNode;
-}) => (
-  <section id={id} className="py-16 sm:py-24">
-    <Container>
-      <div className="mx-auto max-w-3xl text-center">
-        {eyebrow && (
-          <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-primary/80">
-            {eyebrow}
-          </p>
-        )}
-        {title && <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">{title}</h2>}
-        {subtitle && <p className="mt-3 text-muted-foreground">{subtitle}</p>}
-      </div>
-      <div className="mt-10 sm:mt-14">{children}</div>
-    </Container>
-  </section>
-);
-
-// Lightweight, dependency-free fade-in on mount
-function FadeIn({ children, delay = 0 }: { children: ReactNode; delay?: number }) {
-  const style = useMemo(() => ({ transitionDelay: `${delay}ms` }), [delay]);
-  return (
-    <div
-      style={style}
-      className={[
-        "transform transition duration-700 ease-out will-change-transform will-change-opacity",
-        "opacity-100 translate-y-0",
-      ].join(" ")}
-    >
-      {children}
-    </div>
-  );
-}
-
-const Badges = () => (
-  <div className="flex flex-wrap items-center justify-center gap-3" aria-label="Key benefits">
-    {(
-      [
-        [Sparkles, "Expert-led"],
-        [Award, "Certificate"],
-        [Globe2, "Live online"],
-        [Zap, "Hands-on"],
-      ] as const
-    ).map(([Icon, label]) => (
-      <span
-        key={label}
-        className="inline-flex items-center gap-2 rounded-full border bg-background px-3 py-1 text-xs font-medium text-muted-foreground"
-      >
-        <Icon className="h-3.5 w-3.5" aria-hidden /> {label}
-      </span>
-    ))}
-  </div>
-);
-
-/* ---------------- Main Page ---------------- */
+/* ---------------- Types ---------------- */
 
 type LeadResponse = { ok: boolean; error?: string; downloadUrl?: string; requireConfirm?: boolean };
 type ApiResponse = { ok: boolean; error?: string };
+
+/* ---------------- Main Page ---------------- */
 
 function LearnamyteLanding() {
   // “Notify me” form
@@ -111,7 +34,7 @@ function LearnamyteLanding() {
 
   // Brochure form state (modal-like overlay)
   const [brochureOpen, setBrochureOpen] = useState(false);
-  const [selectedCourse, setSelectedCourse] = useState<null | "FOQIC" | "Python">(null);
+  const [selectedCourse, setSelectedCourse] = useState<null | "FOQIC" | "Python" | "DASQL" | "DVPBI">(null);
   const [selectedTitle, setSelectedTitle] = useState<string | null>(null);
   const [leadEmail, setLeadEmail] = useState("");
   const [leadPhone, setLeadPhone] = useState("");
@@ -120,7 +43,7 @@ function LearnamyteLanding() {
 
   function isApiResponse(x: unknown): x is ApiResponse {
     return typeof x === "object" && x !== null && "ok" in x && typeof (x as { ok: unknown }).ok === "boolean";
-    }
+  }
 
   async function handleSubscribe(e: React.FormEvent) {
     e.preventDefault();
@@ -156,7 +79,7 @@ function LearnamyteLanding() {
     }
   }
 
-  async function submitBrochure(course: "FOQIC" | "Python", e: React.FormEvent) {
+  async function submitBrochure(course: "FOQIC" | "Python" | "DASQL" | "DVPBI", e: React.FormEvent) {
     e.preventDefault();
     setLeadMsg(null);
     if (!leadEmail || !leadPhone) {
@@ -185,7 +108,6 @@ function LearnamyteLanding() {
         return;
       }
 
-      // success: trigger download
       setLeadEmail("");
       setLeadPhone("");
       setBrochureOpen(false);
@@ -203,7 +125,7 @@ function LearnamyteLanding() {
   const features = [
     { icon: BookOpen, title: "Workshops that work", desc: "Live, cohort-based classes designed with measurable outcomes." },
     { icon: Users, title: "Verified experts", desc: "We vet instructors for real-world impact, not just credentials." },
-    { icon: CalendarDays, title: "Weekend Sessions", desc: "Sat–Sun, 8–10/11 AM IST plus weekday projects and support." },
+    { icon: CalendarDays, title: "Weekend Sessions", desc: "Sat–Sun plus weekday projects and support." },
     { icon: BarChart3, title: "Trackable progress", desc: "Capstone projects, and analytics to prove learning and reviews." },
   ] as const;
 
@@ -214,7 +136,7 @@ function LearnamyteLanding() {
       items: ["Prompt basics", "Advanced prompting techniques", "Real-world use cases", "Hands-on labs & projects"],
     },
     {
-      title: "Power BI",
+      title: "Data Visualization with Power BI",
       copy: "Transform raw data into insights with Microsoft Power BI.",
       items: ["Data modeling & cleaning", "Interactive dashboards", "DAX formulas & calculations", "Business-ready reports"],
     },
@@ -224,7 +146,7 @@ function LearnamyteLanding() {
       items: ["Pandas for data handling", "Pivot tables & summaries", "Visualization with Matplotlib", "Tkinter for UI design", "Regex for text processing", "OOPs in Python", "SMTP for automation"],
     },
     {
-      title: "SQL and Database",
+      title: "Data Analysis with SQL",
       copy: "Learn SQL & DBMS from fundamentals to practical applications.",
       items: ["Basic queries", "Advance Functions & Joins", "Constraints", "Subqueries", "Transactions", "Indexes, Views & Normalization"],
     },
@@ -233,12 +155,18 @@ function LearnamyteLanding() {
       copy: "Learn quantum computing from the principles of quantum mechanics to hands-on circuits and algorithms.",
       items: ["Qubits & superposition", "Quantum gates & circuits", "Entanglement & teleportation", "Grover’s & Deutsch–Jozsa algorithms", "Quantum Fourier Transform (QFT)", "Error correction basics", "Intro to Qiskit programming"],
     },
+    {
+      title: "One-on-One Program (Personal Development)",
+      copy: "A personalised 1:1 learning plan designed around your schedule. We train you step-by-step until you reach your career goal.",
+      items: ["Machine Learning", "Generative AI", "LLMs", "Data Science", "Cybersecurity", "Cloud Engineering", "Mathematics", "Robotics", "IOT"],
+    },
   ] as const;
 
   const plans = [
     {
       name: "Single Course",
-      price: "₹4,499",
+      tag: "Most popular",
+      price: "₹4,999",
       period: "per course",
       highlights: ["Access to one full workshop", "Live expert-led sessions", "Hands-on projects", "Certificate of completion"],
       href: "/enroll/single",
@@ -246,24 +174,35 @@ function LearnamyteLanding() {
     },
     {
       name: "Bundle (2 Courses)",
-      price: "₹7,499",
+      tag: "Best value",
+      price: "₹7,999",
       period: "one-time",
-      highlights: ["Choose any 2 courses", "Structured learning path", "Project feedback from instructors", "Save ₹1,500 vs buying separately"],
+      highlights: ["Choose any 2 courses", "Structured learning path", "Project feedback from instructors", "Save ₹2,000 vs buying separately"],
       href: "/enroll/bundle",
       featured: false,
     },
     {
       name: "Teams & Corporates",
+      tag: "For companies",
       price: "Custom",
-      period: "contact us",
-      highlights: ["Understanding the requirements for your team", "Private workshops tailored to your needs", "Manager dashboards to track progress", "Dedicated support & Q&A"],
+       period: "tailored pricing",
+      highlights: ["Improve operational efficiency by 20–40%", "Automate manual workflows with in-house tools", "Private cohorts tailored to your stack", "Manager dashboard + progress tracking"],
+      href: "/sales",
+      featured: false,
+    },
+    {
+      name: "Personal Development",
+      tag: "1:1 Mentorship",
+      price: "Custom",
+      period: "talk to us",
+      highlights: ["Personalized career-aligned learning plan", "1:1 mentorship with weekly check-ins", "Portfolio-building projects", "Weekly progress tracking and nudges"],
       href: "/sales",
       featured: false,
     },
   ] as const;
 
   const faqs = [
-    { q: "When are the classes?", a: "Weekend sessions run Sat–Sun, 8–10 or 8–11 AM IST for 4–6 weeks." },
+    { q: "When are the classes?", a: "Weekend sessions run Sat–Sun for 4–6 weeks." },
     { q: "Do I get a certificate?", a: "Yes. Complete the course and Capstone projects to earn a certificate." },
     { q: "Is there a refund policy?", a: "Full refund before the 2nd live session. Transfers allowed to later sessions." },
     { q: "Do you provide 24/7 support?", a: "Yes, we provide 24/7 support during the course period." },
@@ -281,10 +220,11 @@ function LearnamyteLanding() {
               <img src="/Official_Logo.png" alt="Learnamyte Logo" className="h-15 w-15 object-contain" />
               Learnamyte
             </Anchor>
-            <nav className="hidden items-center gap-6 md:flex" aria-label="Primary">
+            <nav className="flex items-center gap-4 text-sm" aria-label="Primary">
+              <a href="#catalog" className="text-sm text-muted-foreground hover:text-foreground">Courses</a>
               <a href="#features" className="text-sm text-muted-foreground hover:text-foreground">Features</a>
-              <a href="#catalog" className="text-sm text-muted-foreground hover:text-foreground">Catalog</a>
               <a href="#pricing" className="text-sm text-muted-foreground hover:text-foreground">Pricing</a>
+              <a href="#about" className="text-sm text-muted-foreground hover:text-foreground">Contact</a>
               <a href="#about" className="text-sm text-muted-foreground hover:text-foreground">About</a>
             </nav>
             <div className="flex items-center gap-2" />
@@ -306,7 +246,7 @@ function LearnamyteLanding() {
                 “Weekend workshops for professionals and students. Expert-led hands-on projects & Corporate training workshops.”
               </p>
               <ul className="mt-4 text-sm text-muted-foreground">
-                <li className="flex items-center gap-2"><Clock className="h-4 w-4" aria-hidden /> Sat–Sun · 8–10/11 AM IST · 16–24 hours total</li>
+                <li className="flex items-center gap-2"><Clock className="h-4 w-4" aria-hidden /> Sat–Sun, 4–6 weeks, 16–24 hours total</li>
                 <li className="flex items-center gap-2"><GraduationCap className="h-4 w-4" aria-hidden /> Capstone projects, reviews, and weekday support</li>
                 <li className="flex items-center gap-2"><ShieldCheck className="h-4 w-4" aria-hidden /> Course completion certificate</li>
               </ul>
@@ -318,13 +258,13 @@ function LearnamyteLanding() {
 
             <FadeIn delay={150}>
               <Section
-              id="gallery"
-              eyebrow="Visual Highlights"
-              title="Explore Learnamyte"
-              subtitle="A glimpse into our workshops and certifications"
-            >
-              <PosterRotator />
-            </Section>
+                id="gallery"
+                eyebrow="Visual Highlights"
+                title="Explore Learnamyte"
+                subtitle="A glimpse into our workshops and certifications"
+              >
+                <PosterRotator />
+              </Section>
             </FadeIn>
           </div>
         </Container>
@@ -362,9 +302,11 @@ function LearnamyteLanding() {
         >
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
             {categories.map((c) => {
-              const isPython = c.title === "Data Optimization with Python";
               const isFOQIC = c.title === "Fundamentals of Quantum Information and Computing";
-              const brochureCourse: "Python" | "FOQIC" | null = isPython ? "Python" : isFOQIC ? "FOQIC" : null;
+              const isDVPBI = c.title === "Data Visualization with Power BI";
+              const isPython = c.title === "Data Optimization with Python";
+              const isDASQL = c.title === "Data Analysis with SQL";
+              const brochureCourse: "Python" | "FOQIC" | "DASQL" | "DVPBI" |null = isPython ? "Python" : isFOQIC ? "FOQIC" : isDASQL ? "DASQL" : isDVPBI ? "DVPBI" : null;
 
               return (
                 <Card key={c.title} className="h-full">
@@ -410,7 +352,7 @@ function LearnamyteLanding() {
           </div>
         </Section>
 
-        {/* Simple modal for brochure form (no external UI lib) */}
+        {/* Simple modal for brochure form */}
         {brochureOpen && (
           <div
             role="dialog"
@@ -516,8 +458,8 @@ function LearnamyteLanding() {
         <Section
           id="pricing"
           eyebrow="Plans"
-          title="Choose your course plan"
-          subtitle="Pay once per course or choose a bundle."
+          title="Pick the learning path that fits you"
+          subtitle="Start with a single workshop, bundle two for savings, or design a custom plan for your team."
         >
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
             {plans.map((p) => (
@@ -590,26 +532,38 @@ function LearnamyteLanding() {
         </Section>
       </main>
 
-      {/* CTA */}
-      <section className="relative">
-        <Container>
-          <div className="overflow-hidden rounded-2xl border bg-gradient-to-r from-primary/10 to-primary/5 p-8 shadow-sm sm:p-10">
-            <div className="flex flex-col items-start gap-6 md:flex-row md:items-center md:justify-between">
-              <div>
-                <h3 className="text-2xl font-bold">Ready to learn by doing?</h3>
-                <p className="mt-2 text-muted-foreground">Join thousands leveling up with expert-led workshops.</p>
-              </div>
-              <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
-                <Anchor href="mailto:team@learnamyte.com?subject=Learnamyte%20Course%20Inquiry&body=Hello%20Team%2C%0D%0A%0AI%20would%20like%20to%20know%20more%20about%20your%20workshops.">
-                  <Button size="lg" variant="outline" className="gap-2">
-                    <Mail className="h-4 w-4" aria-hidden /> Talk to support
-                  </Button>
-                </Anchor>
-              </div>
-            </div>
-          </div>
-        </Container>
-      </section>
+{/* CTA */}
+<section className="relative">
+  <Container>
+    <div className="overflow-hidden rounded-2xl border bg-gradient-to-r from-primary/10 to-primary/5 p-8 shadow-sm sm:p-10">
+      <div className="flex flex-col items-start gap-6 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h3 className="text-2xl font-bold">Ready to learn by doing?</h3>
+          <p className="mt-2 text-muted-foreground">Join thousands leveling up with expert-led workshops.</p>
+        </div>
+
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+          
+          {/* Email Support */}
+          <Anchor href="mailto:team@learnamyte.com?subject=Learnamyte%20Course%20Inquiry&body=Hello%20Team%2C%0D%0A%0AI%20would%20like%20to%20know%20more%20about%20your%20workshops.">
+            <Button size="lg" variant="outline" className="gap-2">
+              <Mail className="h-4 w-4" aria-hidden /> Mail us
+            </Button>
+          </Anchor>
+
+          {/* Call Button */}
+          <Anchor href="tel:+916382489221">
+            <Button size="lg" variant="outline" className="gap-2">
+              <Phone className="h-4 w-4" aria-hidden /> Call us
+            </Button>
+          </Anchor>
+
+        </div>
+      </div>
+    </div>
+  </Container>
+</section>
+
 
       {/* Footer */}
       <footer className="mt-16 border-t py-10 text-sm" role="contentinfo">
