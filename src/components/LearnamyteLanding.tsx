@@ -7,7 +7,7 @@ import {
   BookOpen, CalendarDays, Users, Sparkles,
   CheckCircle2, Mail, ArrowRight, BarChart3,
   Quote, Clock, GraduationCap, ShieldCheck,
-  Phone
+  Phone, Menu, X,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -40,6 +40,7 @@ function LearnamyteLanding() {
   const [leadPhone, setLeadPhone] = useState("");
   const [leadMsg, setLeadMsg] = useState<string | null>(null);
   const [leadBusy, setLeadBusy] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   function isApiResponse(x: unknown): x is ApiResponse {
     return typeof x === "object" && x !== null && "ok" in x && typeof (x as { ok: unknown }).ok === "boolean";
@@ -212,25 +213,91 @@ function LearnamyteLanding() {
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30" style={{ color: "#193CB8" }}>
       <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:rounded focus:bg-primary focus:px-3 focus:py-2 focus:text-primary-foreground">Skip to content</a>
 
-      {/* Header */}
-      <header className="sticky top-0 z-40 w-full border-b bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/50" role="banner">
-        <Container>
-          <div className="flex h-16 items-center justify-between">
-            <Anchor href="/" className="flex items-center gap-2 font-bold tracking-tight" aria-label="Learnamyte home">
-              <img src="/Official_Logo.png" alt="Learnamyte Logo" className="h-15 w-15 object-contain" />
-              Learnamyte
-            </Anchor>
-            <nav className="flex items-center gap-4 text-sm" aria-label="Primary">
-              <a href="#catalog" className="text-sm text-muted-foreground hover:text-foreground">Courses</a>
-              <a href="#features" className="text-sm text-muted-foreground hover:text-foreground">Features</a>
-              <a href="#pricing" className="text-sm text-muted-foreground hover:text-foreground">Pricing</a>
-              <a href="#about" className="text-sm text-muted-foreground hover:text-foreground">Contact</a>
-              <a href="#about" className="text-sm text-muted-foreground hover:text-foreground">About</a>
-            </nav>
-            <div className="flex items-center gap-2" />
-          </div>
-        </Container>
-      </header>
+{/* Header */}
+<header className="sticky top-0 z-40 w-full border-b bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/50" role="banner">
+  <Container>
+    <div className="flex h-16 items-center justify-between">
+      {/* Logo */}
+      <Anchor
+        href="/"
+        className="flex items-center gap-2 font-bold tracking-tight"
+        aria-label="Learnamyte home"
+      >
+        <img
+          src="/Official_Logo.png"
+          alt="Learnamyte Logo"
+          className="h-8 w-8 object-contain"
+        />
+        <span className="text-base sm:text-lg">Learnamyte</span>
+      </Anchor>
+
+      {/* Desktop nav */}
+      <nav className="hidden items-center gap-4 text-sm md:flex" aria-label="Primary">
+        <a href="#catalog" className="text-muted-foreground hover:text-foreground">Courses</a>
+        <a href="#features" className="text-muted-foreground hover:text-foreground">Features</a>
+        <a href="#pricing" className="text-muted-foreground hover:text-foreground">Pricing</a>
+        <a href="#contact" className="text-muted-foreground hover:text-foreground">Contact</a>
+        <a href="#about" className="text-muted-foreground hover:text-foreground">About</a>
+      </nav>
+
+      {/* Mobile menu button */}
+      <button
+        type="button"
+        className="inline-flex items-center justify-center rounded-md p-2 md:hidden"
+        aria-label="Toggle navigation"
+        onClick={() => setMobileOpen((prev) => !prev)}
+      >
+        {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+      </button>
+    </div>
+  </Container>
+
+  {/* Mobile nav panel */}
+  {mobileOpen && (
+    <div className="border-t bg-background md:hidden">
+      <Container>
+        <nav className="flex flex-col gap-2 py-3 text-sm" aria-label="Mobile Primary">
+          <a
+            href="#catalog"
+            className="text-muted-foreground hover:text-foreground"
+            onClick={() => setMobileOpen(false)}
+          >
+            Courses
+          </a>
+          <a
+            href="#features"
+            className="text-muted-foreground hover:text-foreground"
+            onClick={() => setMobileOpen(false)}
+          >
+            Features
+          </a>
+          <a
+            href="#pricing"
+            className="text-muted-foreground hover:text-foreground"
+            onClick={() => setMobileOpen(false)}
+          >
+            Pricing
+          </a>
+          <a
+            href="#contact"
+            className="text-muted-foreground hover:text-foreground"
+            onClick={() => setMobileOpen(false)}
+          >
+            Contact
+          </a>
+          <a
+            href="#about"
+            className="text-muted-foreground hover:text-foreground"
+            onClick={() => setMobileOpen(false)}
+          >
+            About
+          </a>
+        </nav>
+      </Container>
+    </div>
+  )}
+</header>
+
 
       {/* Hero */}
       <section className="relative overflow-hidden">
@@ -532,18 +599,24 @@ function LearnamyteLanding() {
         </Section>
       </main>
 
-{/* CTA */}
-<section className="relative">
-  <Container>
+{/* CTA / Contact */}
+<Section
+  id="contact"
+  eyebrow="Get in touch"
+  title="We’re here to help"
+  subtitle="Reach out anytime for support or course questions."
+>
+  <div className="relative">
     <div className="overflow-hidden rounded-2xl border bg-gradient-to-r from-primary/10 to-primary/5 p-8 shadow-sm sm:p-10">
       <div className="flex flex-col items-start gap-6 md:flex-row md:items-center md:justify-between">
         <div>
           <h3 className="text-2xl font-bold">Ready to learn by doing?</h3>
-          <p className="mt-2 text-muted-foreground">Join thousands leveling up with expert-led workshops.</p>
+          <p className="mt-2 text-muted-foreground">
+            Join thousands leveling up with expert-led workshops.
+          </p>
         </div>
 
         <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
-          
           {/* Email Support */}
           <Anchor href="mailto:team@learnamyte.com?subject=Learnamyte%20Course%20Inquiry&body=Hello%20Team%2C%0D%0A%0AI%20would%20like%20to%20know%20more%20about%20your%20workshops.">
             <Button size="lg" variant="outline" className="gap-2">
@@ -557,12 +630,11 @@ function LearnamyteLanding() {
               <Phone className="h-4 w-4" aria-hidden /> Call us
             </Button>
           </Anchor>
-
         </div>
       </div>
     </div>
-  </Container>
-</section>
+  </div>
+</Section>
 
 
       {/* Footer */}
