@@ -1,56 +1,124 @@
 // src/lib/certificates.ts
-
 import crypto from "crypto";
+import { supabaseAdmin } from "./supabaseAdmin";
 
 export type CertificateStatus = "valid" | "revoked" | "expired" | "pending";
 
 export interface CertificateRecord {
-  token: string;          // secure verification token, e.g. c_tq9WcF6ZsKLD7y2pX8hR
-  certificateId: string;  // human-readable ID, e.g. DOP-LN01-2501-001
+  id: string;
+  token: string;
+  certificateId: string;
   learnerName: string;
+  learnerEmail: string | null;
   courseName: string;
-  completedOn: string;    // ISO date string, e.g. "2025-11-30"
-  issuedBy: string;       // e.g. "Learnamyte"
+  courseCode: string;
+  completedOn: string; // ISO date
+  issuedBy: string;
   status: CertificateStatus;
-  createdAt: string;      // ISO date string
+  createdAt: string;
 }
 
 /**
- * TEMP: In-memory “database” so you can test the flow.
- * Replace this with a real DB query later.
+ * Generate a secure, unguessable verification token.
+ * This is what goes into /verify/<token> and QR codes.
  */
-const MOCK_CERTIFICATES: CertificateRecord[] = [
-  {
-    token: "c_tq9WcF6ZsKLD7y2pX8hR",
-    certificateId: "DOP-LN01-2501-001",
-    learnerName: "Abinesh JV",
-    courseName: "Data Optimization with Python",
-    completedOn: "2025-11-30",
-    issuedBy: "Learnamyte",
-    status: "valid",
-    createdAt: "2025-11-30T10:00:00.000Z",
-  },
-];
+export function generateVerificationToken(): string {
+  const bytes = crypto.randomBytes(16).toString("base64url");
+  return `c_${bytes.slice(0, 20)}`; // e.g. c_tq9WcF6ZsKLD7y2pX8hR
+}
 
 /**
- * Look up a certificate by verification token.
+ * Generate a human-readable certificate ID.
+ * Example: DOP-251130-7F9C
+ */
+export function generateCertificateId(courseCode: string): string {
+  const now = new Date();
+  const yy = now.getFullYear().toString().slice(-2);
+  const mm = String(now.getMonth() + 1).padStart(2, "0");
+  const dd = String(now.getDate()).padStart(2, "0");
+  const suffix = crypto.randomBytes(2).toString("hex").toUpperCase(); // 4 chars
+  return `${courseCode}-${yy}${mm}${dd}-${suffix}`;
+}
+
+/**
+ * Issue a new certificate:
+ *  - generates certificateId + token
+ *  - stores in Supabase
+ *  - returns the record
+ */
+export async function issueCertificate(input: {
+  learnerName: string;
+  learnerEmail?: string;
+  courseName: string;
+  courseCode: string;
+  completedOn: string; // "YYYY-MM-DD"
+}): Promise<CertificateRecord> {
+  const token = generateVerificationToken();
+  const certificateId = generateCertificateId(input.courseCode);
+
+  const { data, error } = await supabaseAdmin
+    .from("certificates")
+    .insert({
+      token,
+      certificate_id: certificateId,
+      learner_name: input.learnerName,
+      learner_email: input.learnerEmail ?? null,
+      course_name: input.courseName,
+      course_code: input.courseCode,
+      completed_on: input.completedOn,
+      issued_by: "Learnamyte",
+      status: "valid",
+    })
+    .select()
+    .single();
+
+  if (error || !data) {
+    console.error("Error inserting certificate", error);
+    throw new Error("Failed to issue certificate.");
+  }
+
+  return {
+    id: data.id,
+    token: data.token,
+    certificateId: data.certificate_id,
+    learnerName: data.learner_name,
+    learnerEmail: data.learner_email,
+    courseName: data.course_name,
+    courseCode: data.course_code,
+    completedOn: data.completed_on,
+    issuedBy: data.issued_by,
+    status: data.status,
+    createdAt: data.created_at,
+  };
+}
+
+/**
+ * Lookup for verification flow (/verify/[token] and /api/verify/[token]).
  */
 export async function getCertificateByToken(
   token: string,
 ): Promise<CertificateRecord | null> {
-  // Basic sanity check
-  if (!token.startsWith("c_") || token.length < 12) {
-    return null;
-  }
+  if (!token.startsWith("c_") || token.length < 12) return null;
 
-  const record = MOCK_CERTIFICATES.find((c) => c.token === token);
-  return record ?? null;
-}
+  const { data, error } = await supabaseAdmin
+    .from("certificates")
+    .select("*")
+    .eq("token", token)
+    .maybeSingle();
 
-/**
- * Generate a secure verification token for new certificates.
- */
-export function generateVerificationToken(): string {
-  const bytes = crypto.randomBytes(16).toString("base64url"); // URL-safe
-  return `c_${bytes.slice(0, 20)}`;
+  if (error || !data) return null;
+
+  return {
+    id: data.id,
+    token: data.token,
+    certificateId: data.certificate_id,
+    learnerName: data.learner_name,
+    learnerEmail: data.learner_email,
+    courseName: data.course_name,
+    courseCode: data.course_code,
+    completedOn: data.completed_on,
+    issuedBy: data.issued_by,
+    status: data.status,
+    createdAt: data.created_at,
+  };
 }

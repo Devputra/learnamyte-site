@@ -1,23 +1,18 @@
 // src/app/api/verify/[token]/route.ts
 import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-import { getCertificateByToken } from "@/lib/certificates";
+import { getCertificateByToken, type CertificateRecord } from "@/lib/certificates";
+
+type RouteParams = {
+  token: string;
+};
 
 export async function GET(
-  _req: NextRequest,
-  context: { params: Promise<{ token: string }> },
+  _req: Request,
+  ctx: { params: RouteParams }
 ) {
-  // In Next 15 validator, params is wrapped in a Promise
-  const { token } = await context.params;
+  const { token } = ctx.params;
 
-  if (!token || typeof token !== "string") {
-    return NextResponse.json(
-      { ok: false, error: "Invalid token" },
-      { status: 400 },
-    );
-  }
-
-  const cert = await getCertificateByToken(token);
+  const cert: CertificateRecord | null = await getCertificateByToken(token);
 
   if (!cert) {
     return NextResponse.json(
@@ -30,9 +25,10 @@ export async function GET(
     {
       ok: true,
       certificate: {
+        token: cert.token,
         certificateId: cert.certificateId,
         learnerName: cert.learnerName,
-        learnerEmail: cert.learnerEmail,
+        learnerEmail: cert.learnerEmail, // 👈 now TS knows this exists
         courseName: cert.courseName,
         courseCode: cert.courseCode,
         completedOn: cert.completedOn,
