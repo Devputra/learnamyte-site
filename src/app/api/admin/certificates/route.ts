@@ -1,8 +1,10 @@
 // src/app/api/admin/certificates/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { issueCertificate } from "@/lib/certificates";
+import { createClient } from "@supabase/supabase-js";
 
 const ADMIN_ISSUE_SECRET = process.env.ADMIN_ISSUE_SECRET;
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 export async function POST(req: NextRequest) {
   try {
@@ -13,27 +15,47 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+      console.error("Supabase env missing", {
+        SUPABASE_URL,
+        hasServiceKey: !!SUPABASE_SERVICE_ROLE_KEY,
+      });
+      return NextResponse.json(
+        { ok: false, error: "Supabase configuration missing" },
+        { status: 500 },
+      );
+    }
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
     const body = await req.json();
 
-    // Admin secret can come from body or header
-    const adminSecretFromBody = (body.adminSecret as string | undefined) ?? "";
-    const adminSecretFromHeader = req.headers.get("x-admin-secret") ?? "";
-    const adminSecret = adminSecretFromBody || adminSecretFromHeader;
+    // ---- get adminSecret from body OR Authorization header ----
+    const authHeader = req.headers.get("authorization") ?? "";
+    let adminSecret: string =
+      (body.adminSecret as string | undefined)?.trim() ?? "";
 
-    // Only enforce the secret check in production
-    if (process.env.NODE_ENV === "production" && adminSecret !== ADMIN_ISSUE_SECRET) {
+    if (!adminSecret && authHeader.toLowerCase().startsWith("bearer ")) {
+      adminSecret = authHeader.slice(7).trim();
+    }
+
+    const {
+      learnerName,
+      learnerEmail,
+      courseName,
+      courseCode,
+      completedOn,
+    } = body;
+
+    if (
+      process.env.NODE_ENV === "production" &&
+      adminSecret !== ADMIN_ISSUE_SECRET
+    ) {
       return NextResponse.json(
         { ok: false, error: "Unauthorized" },
         { status: 401 },
       );
     }
-
-    const learnerName = (body.learnerName as string | undefined)?.trim() ?? "";
-    const learnerEmail =
-      (body.learnerEmail as string | undefined)?.trim() || undefined;
-    const courseName = (body.courseName as string | undefined)?.trim() ?? "";
-    const courseCode = (body.courseCode as string | undefined)?.trim() ?? "";
-    const completedOn = (body.completedOn as string | undefined)?.trim() ?? "";
 
     if (!learnerName || !courseName || !courseCode || !completedOn) {
       return NextResponse.json(
@@ -42,24 +64,50 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const certificate = await issueCertificate({
-      learnerName,
-      learnerEmail,
-      courseName,
-      courseCode,
-      completedOn,
+    const certificateId = `${courseCode}-LN01-2511-001`;
+    const verifyToken = `c_${Math.random().toString(36).slice(2, 10)}`;
+
+    const { error } = await supabase.from("certificates").insert({
+      certificate_id: certificateId,
+      token: verifyToken,
+      learner_name: learnerName,
+      learner_email: learnerEmail || null,
+      course_name: courseName,
+      course_code: courseCode,
+      completed_on: completedOn,
+      issued_by: "admin",
+      status: "valid",
     });
+
+    if (error) {
+      console.error("[api/admin/certificates] Supabase insert error:", error);
+      return NextResponse.json(
+        { ok: false, error: error.message },
+        { status: 500 },
+      );
+    }
 
     const baseUrl =
       process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
-    const normalizedBase = baseUrl.replace(/\/+$/, "");
-    const verifyUrl = `${normalizedBase}/verify/${certificate.token}`;
 
-    return NextResponse.json({
-      ok: true,
-      certificate,
-      verifyUrl,
-    });
+    const verifyUrl = `${baseUrl.replace(/\/+$/, "")}/verify/${verifyToken}`;
+
+    return NextResponse.json(
+      {
+        ok: true,
+        certificate: {
+          certificateId,
+          token: verifyToken,
+          learnerName,
+          learnerEmail,
+          courseName,
+          courseCode,
+          completedOn,
+        },
+        verifyUrl,
+      },
+      { status: 200 },
+    );
   } catch (err) {
     console.error("[api/admin/certificates] error:", err);
     return NextResponse.json(
