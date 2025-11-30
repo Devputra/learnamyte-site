@@ -1,18 +1,20 @@
 // src/app/api/verify/[token]/route.ts
-import { NextResponse } from "next/server";
-import { getCertificateByToken, type CertificateRecord } from "@/lib/certificates";
+import { NextRequest, NextResponse } from "next/server";
+import { getCertificateByToken } from "@/lib/certificates";
 
+// In Next 15, `params` is a Promise in route handlers
 type RouteParams = {
   token: string;
 };
 
 export async function GET(
-  _req: Request,
-  ctx: { params: RouteParams }
+  _req: NextRequest,
+  context: { params: Promise<RouteParams> }
 ) {
-  const { token } = ctx.params;
+  // Await params to get the token
+  const { token } = await context.params;
 
-  const cert: CertificateRecord | null = await getCertificateByToken(token);
+  const cert = await getCertificateByToken(token);
 
   if (!cert) {
     return NextResponse.json(
@@ -28,7 +30,7 @@ export async function GET(
         token: cert.token,
         certificateId: cert.certificateId,
         learnerName: cert.learnerName,
-        learnerEmail: cert.learnerEmail, // 👈 now TS knows this exists
+        learnerEmail: cert.learnerEmail,
         courseName: cert.courseName,
         courseCode: cert.courseCode,
         completedOn: cert.completedOn,
