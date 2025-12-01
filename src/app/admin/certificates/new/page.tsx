@@ -21,7 +21,8 @@ export default function NewCertificatePage() {
     COURSE_PRESETS[0].courseCode,
   );
   const [completedOn, setCompletedOn] = useState("");
-  const [adminSecret, setAdminSecret] = useState(""); // <-- new
+  const [certificateId, setCertificateId] = useState("");
+  const [adminSecret, setAdminSecret] = useState(""); 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<{
@@ -57,6 +58,7 @@ export default function NewCertificatePage() {
           learnerEmail,
           courseName: preset.courseName,
           courseCode: preset.courseCode,
+          certificateId: certificateId || undefined, 
           completedOn,
         }),
       });
@@ -73,7 +75,8 @@ export default function NewCertificatePage() {
       });
       setLearnerName("");
       setLearnerEmail("");
-      setCompletedOn("");
+      setCertificateId("");
+      setCompletedOn(""); 
       setAdminSecret("");
     } catch (err) {
       const msg =
@@ -136,6 +139,20 @@ export default function NewCertificatePage() {
                 </select>
                 <p className="text-xs text-muted-foreground">
                   The certificate ID will be generated using this course code.
+                </p>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-sm font-medium">
+                  Certificate ID (optional)
+                </label>
+                <Input
+                  value={certificateId}
+                  onChange={(e) => setCertificateId(e.target.value)}
+                  placeholder="ABC-DE00-0000-000"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Leave this blank to auto-generate an ID. Enter a value to use a specific ID.
                 </p>
               </div>
 

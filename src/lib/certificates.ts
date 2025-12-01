@@ -52,9 +52,15 @@ export async function issueCertificate(input: {
   courseName: string;
   courseCode: string;
   completedOn: string; // "YYYY-MM-DD"
+  certificateId?: string;          // ✅ NEW
 }): Promise<CertificateRecord> {
   const token = generateVerificationToken();
-  const certificateId = generateCertificateId(input.courseCode);
+
+  // If admin typed one, use that; else fall back to auto pattern
+  const certificateId =
+    input.certificateId && input.certificateId.trim().length > 0
+      ? input.certificateId.trim()
+      : generateCertificateId(input.courseCode);
 
   const { data, error } = await supabaseAdmin
     .from("certificates")
