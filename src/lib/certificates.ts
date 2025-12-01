@@ -95,11 +95,7 @@ export async function issueCertificate(input: {
 /**
  * Lookup for verification flow (/verify/[token] and /api/verify/[token]).
  */
-export async function getCertificateByToken(
-  token: string,
-): Promise<CertificateRecord | null> {
-  if (!token.startsWith("c_") || token.length < 12) return null;
-
+export async function getCertificateByToken(token: string) {
   const { data, error } = await supabaseAdmin
     .from("certificates")
     .select("*")
