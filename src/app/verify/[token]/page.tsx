@@ -1,12 +1,18 @@
 // src/app/verify/[token]/page.tsx
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, CheckCircle2, AlertTriangle } from "lucide-react";
+import { ArrowLeft, CheckCircle2, AlertTriangle, Download } from "lucide-react";
 import {
   getCertificateByToken,
   type CertificateRecord,
 } from "@/lib/certificates";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
@@ -49,8 +55,6 @@ export async function generateMetadata(
 export default async function VerifyPage(props: VerifyPageProps) {
   const { token } = await props.params;
 
-  console.log("[verify] token param:", token);
-
   const cert: CertificateRecord | null = await getCertificateByToken(token);
 
   /* --------- Not Found UI --------- */
@@ -80,12 +84,17 @@ export default async function VerifyPage(props: VerifyPageProps) {
 
   const isActive = cert.status === "valid";
 
+  // NEW: badge + download URL + base verification URL
+  const badgeSrc = `/badges/${cert.courseCode}.png`;
+  const downloadHref = `/api/certificate/${cert.token}`;
+  const verifyBase =
+    process.env.NEXT_PUBLIC_BASE_URL ?? "https://www.learnamyte.com";
+
   /* --------- Valid Certificate UI --------- */
 
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-10">
       <div className="mx-auto max-w-3xl">
-        
         {/* Top bar */}
         <header className="mb-8 flex items-center justify-between">
           <Link
@@ -129,7 +138,34 @@ export default async function VerifyPage(props: VerifyPageProps) {
           </CardHeader>
 
           <CardContent className="space-y-6 text-sm">
-            
+            {/* NEW: Badge + core info */}
+            <section className="flex items-center gap-4">
+              <div className="relative h-20 w-20 rounded-full overflow-hidden border bg-white">
+                <Image
+                  src={badgeSrc}
+                  alt={`${cert.courseName} badge`}
+                  fill
+                  className="object-contain"
+                />
+              </div>
+              <div className="space-y-1 text-xs">
+                <div className="font-semibold text-muted-foreground uppercase">
+                  Course
+                </div>
+                <div className="text-sm font-medium">
+                  {cert.courseName}{" "}
+                  <span className="text-xs text-muted-foreground">
+                    ({cert.courseCode})
+                  </span>
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  Issued to{" "}
+                  <span className="font-semibold">{cert.learnerName}</span> on{" "}
+                  {formatDate(cert.completedOn)}.
+                </div>
+              </div>
+            </section>
+
             {/* Info Grid */}
             <section className="grid gap-4 sm:grid-cols-2">
               <div>
@@ -179,22 +215,42 @@ export default async function VerifyPage(props: VerifyPageProps) {
               </div>
             </section>
 
-            {/* Footer */}
-            <section className="border-t pt-4 text-xs text-muted-foreground">
-              <p>
-                This page confirms that the above learner has been issued a
-                certificate by Learnamyte for successfully completing the
-                mentioned course. If you suspect tampering, please contact{" "}
-                <a
-                  href="mailto:team@learnamyte.com"
-                  className="underline"
-                >
-                  team@learnamyte.com
-                </a>
-                .
-              </p>
-            </section>
+            {/* Footer + verification link + DOWNLOAD BUTTON */}
+            <section className="border-t pt-4 mt-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between text-xs text-muted-foreground">
+              <div className="space-y-1">
+                <p>
+                  This page confirms that the above learner has been issued a
+                  certificate by Learnamyte for successfully completing the
+                  mentioned course.
+                </p>
+                <p>
+                  Issued by: <span className="font-medium">Learnamyte</span>
+                </p>
+                <p className="font-mono break-all">
+                  Verification link:{" "}
+                  {`${verifyBase}/verify/${cert.token}`}
+                </p>
+                <p>
+                  If you suspect tampering, please contact{" "}
+                  <a
+                    href="mailto:team@learnamyte.com"
+                    className="underline"
+                  >
+                    team@learnamyte.com
+                  </a>
+                  .
+                </p>
+              </div>
 
+              <div className="sm:text-right">
+                <Button asChild size="sm">
+                  <a href={downloadHref}>
+                    <Download className="mr-2 h-4 w-4" />
+                    Download certificate (PDF)
+                  </a>
+                </Button>
+              </div>
+            </section>
           </CardContent>
         </Card>
       </div>

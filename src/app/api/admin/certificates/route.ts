@@ -1,6 +1,10 @@
 // src/app/api/admin/certificates/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import {
+  generateCertificateId,
+  generateVerificationToken,
+} from "@/lib/certificates";
 
 const ADMIN_ISSUE_SECRET = process.env.ADMIN_ISSUE_SECRET;
 const SUPABASE_URL = process.env.SUPABASE_URL;
@@ -44,6 +48,7 @@ export async function POST(req: NextRequest) {
       learnerEmail,
       courseName,
       courseCode,
+      certificateId,
       completedOn,
     } = body;
 
@@ -64,11 +69,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const certificateId = `${courseCode}-LN01-2511-001`;
-    const verifyToken = `c_${Math.random().toString(36).slice(2, 10)}`;
+    // ✅ use shared helpers so everything is consistent
+    const verifyToken = generateVerificationToken();
+    const finalCertificateId =
+      certificateId && certificateId.trim().length > 0
+        ? certificateId.trim()
+        : generateCertificateId(courseCode);
 
     const { error } = await supabase.from("certificates").insert({
-      certificate_id: certificateId,
+      certificate_id: finalCertificateId,
       token: verifyToken,
       learner_name: learnerName,
       learner_email: learnerEmail || null,
@@ -96,7 +105,7 @@ export async function POST(req: NextRequest) {
       {
         ok: true,
         certificate: {
-          certificateId,
+          certificateId: finalCertificateId,
           token: verifyToken,
           learnerName,
           learnerEmail,
