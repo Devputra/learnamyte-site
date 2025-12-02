@@ -1,5 +1,5 @@
 // src/app/api/certificate/[token]/route.ts
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { getCertificateByToken } from "@/lib/certificates";
 
@@ -7,9 +7,12 @@ const CERT_BUCKET = "certificates";
 
 export const runtime = "nodejs";
 
-export async function GET(_req: Request, context: any) {
-  // In Next 15, params is a Promise – we await it
-  const { token } = await context.params;
+export async function GET(
+  _req: NextRequest,
+  { params }: { params: Promise<{ token: string }> },
+) {
+  // In Next 15, params is a Promise
+  const { token } = await params;
 
   const certificate = await getCertificateByToken(token);
   if (!certificate) {
