@@ -1,17 +1,18 @@
 // src/app/api/certificate/[token]/route.ts
 import { NextResponse } from "next/server";
-import fs from "node:fs/promises";
-import path from "node:path";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { getCertificateByToken } from "@/lib/certificates";
+
+const CERT_BUCKET = "certificates";
 
 export const runtime = "nodejs";
 
 export async function GET(
   _req: Request,
-  context: { params: Promise<{ token: string }> },
+  { params }: { params: Promise<{ token: string }> },
 ) {
-
-  const { token } = await context.params;
+  // In Next 15, params is a Promise
+  const { token } = await params;
 
   const certificate = await getCertificateByToken(token);
   if (!certificate) {
@@ -21,27 +22,30 @@ export async function GET(
     );
   }
 
-  const filename = `${certificate.certificateId}.pdf`;
-  const abs = path.join(process.cwd(), "public", "certificates", filename);
+  const filePath = `${certificate.certificateId}.pdf`;
 
-  try {
-    const buf = await fs.readFile(abs);
-    const ab = buf.buffer.slice(
-      buf.byteOffset,
-      buf.byteOffset + buf.byteLength,
-    ) as ArrayBuffer;
+  const { data, error } = await supabaseAdmin.storage
+    .from(CERT_BUCKET)
+    .download(filePath);
 
-    return new Response(ab, {
-      status: 200,
-      headers: {
-        "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="${filename}"`,
-      },
-    });
-  } catch {
+  if (error || !data) {
+    console.error("Error downloading certificate PDF:", error);
     return NextResponse.json(
-      { ok: false, error: "PDF file not found on server" },
+      { ok: false, error: "Certificate PDF not found" },
       { status: 404 },
     );
   }
+
+  // Supabase returns a Blob-like object; convert to ArrayBuffer
+  const arrayBuffer = await data.arrayBuffer();
+
+  return new Response(arrayBuffer, {
+    status: 200,
+    headers: {
+      "Content-Type": "application/pdf",
+      "Content-Disposition": `attachment; filename="${certificate.certificateId}.pdf"`,
+      // Long-lived cache: good for recruiters clicking the same link many times
+      "Cache-Control": "public, max-age=31536000, immutable",
+    },
+  });
 }
