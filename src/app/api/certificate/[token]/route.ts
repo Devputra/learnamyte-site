@@ -7,12 +7,9 @@ const CERT_BUCKET = "certificates";
 
 export const runtime = "nodejs";
 
-export async function GET(
-  _req: Request,
-  { params }: { params: Promise<{ token: string }> },
-) {
-  // In Next 15, params is a Promise
-  const { token } = await params;
+export async function GET(_req: Request, context: any) {
+  // In Next 15, params is a Promise – we await it
+  const { token } = await context.params;
 
   const certificate = await getCertificateByToken(token);
   if (!certificate) {
@@ -36,7 +33,6 @@ export async function GET(
     );
   }
 
-  // Supabase returns a Blob-like object; convert to ArrayBuffer
   const arrayBuffer = await data.arrayBuffer();
 
   return new Response(arrayBuffer, {
@@ -44,7 +40,6 @@ export async function GET(
     headers: {
       "Content-Type": "application/pdf",
       "Content-Disposition": `attachment; filename="${certificate.certificateId}.pdf"`,
-      // Long-lived cache: good for recruiters clicking the same link many times
       "Cache-Control": "public, max-age=31536000, immutable",
     },
   });
