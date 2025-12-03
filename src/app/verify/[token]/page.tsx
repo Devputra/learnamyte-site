@@ -101,10 +101,12 @@ export default async function VerifyPage(props: VerifyPageProps) {
             href="/"
             className="flex items-center gap-2 font-semibold tracking-tight text-primary"
           >
-            <span className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-primary/30 bg-white text-sm font-bold">
-              L
-            </span>
-            <span>Learnamyte</span>
+            <img
+              src="/Official_Logo.png"
+              alt="Learnamyte Logo"
+              className="h-8 w-8 object-contain"
+            />
+            <span className="text-[#193bc8]">Learnamyte</span>
           </Link>
 
           <Button variant="outline" size="sm" asChild>
@@ -234,7 +236,7 @@ export default async function VerifyPage(props: VerifyPageProps) {
                   If you suspect tampering, please contact{" "}
                   <a
                     href="mailto:team@learnamyte.com"
-                    className="underline"
+                    className="underline hover:text-[#193BC8]"
                   >
                     team@learnamyte.com
                   </a>
@@ -243,9 +245,9 @@ export default async function VerifyPage(props: VerifyPageProps) {
               </div>
 
               <div className="sm:text-right">
-                <Button asChild size="sm">
+                <Button asChild size="sm" className="mt-4 bg-black text-white hover:bg-[#193BC8]">
                   <a href={downloadHref}>
-                    <Download className="mr-2 h-4 w-4" />
+                    <Download className="mr-2 h-4 w-4 " />
                     Download certificate (PDF)
                   </a>
                 </Button>
