@@ -27,7 +27,7 @@ export async function GET(req: Request) {
   if (!file || !exp) return NextResponse.json({ ok: false, error: "Bad token" }, { status: 400 });
   if (Date.now() / 1000 > exp) return NextResponse.json({ ok: false, error: "Link expired" }, { status: 410 });
 
-  const allow = new Set(["FOQIC.pdf", "DOP.pdf"]);
+  const allow = new Set(["FOQIC.pdf", "DOP.pdf", "DASQL.pdf", "DVPBI.pdf"]);
   if (!allow.has(file)) return NextResponse.json({ ok: false, error: "Not allowed" }, { status: 403 });
 
   const abs = path.join(process.cwd(), "public", "brochures", file);

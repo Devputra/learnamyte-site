@@ -100,7 +100,10 @@ function LearnamyteLanding() {
       const data = (await res.json().catch(() => ({}))) as LeadResponse;
 
       if (res.status === 202 || data.requireConfirm) {
-        setLeadMsg("Almost there! Please confirm your email from your inbox, then click “Get PDF” again.");
+        setLeadMsg(
+  "Almost there! Please confirm your email from your inbox. After you confirm, your brochure will download automatically.",
+);
+
         return;
       }
 
