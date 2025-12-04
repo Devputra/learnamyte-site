@@ -1,5 +1,6 @@
 // src/app/api/mailchimp-download/route.ts
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import crypto from "node:crypto";
 
 export const runtime = "nodejs";
@@ -8,10 +9,24 @@ type CourseCode = "FOQIC" | "Python" | "DASQL" | "DVPBI";
 
 const COURSE_FILES: Record<CourseCode, string> = {
   FOQIC: "FOQIC.pdf",
-  Python: "DOP.pdf",
-  DASQL: "DASQL.pdf",
-  DVPBI: "DVPBI.pdf",
+  Python: "DOP.pdf",   // Data Optimization with Python
+  DASQL: "DASQL.pdf",  // Data Analysis with SQL
+  DVPBI: "DVPBI.pdf",  // Data Visualization with Power BI
 };
+
+interface MailchimpTag {
+  name: string;
+}
+
+interface MailchimpMergeFields {
+  COURSE?: string | null;
+}
+
+interface MailchimpMember {
+  status?: string;
+  tags?: MailchimpTag[];
+  merge_fields?: MailchimpMergeFields;
+}
 
 function sign(payload: object, secret: string) {
   const body = Buffer.from(JSON.stringify(payload)).toString("base64url");
@@ -22,6 +37,11 @@ function sign(payload: object, secret: string) {
   return `${body}.${sig}`;
 }
 
+/**
+ * Called by Mailchimp after final confirmation.
+ * Redirect URL in Mailchimp:
+ *   https://www.learnamyte.com/api/mailchimp-download?email=*|EMAIL|*
+ */
 export async function GET(req: NextRequest) {
   const email = req.nextUrl.searchParams.get("email");
 
@@ -47,7 +67,7 @@ export async function GET(req: NextRequest) {
   const basic = Buffer.from(`anystring:${apiKey}`).toString("base64");
   const hash = crypto.createHash("md5").update(email.toLowerCase()).digest("hex");
 
-  // 1) Fetch subscriber from Mailchimp
+  // 1) Get subscriber from Mailchimp
   const res = await fetch(
     `https://${dc}.api.mailchimp.com/3.0/lists/${listId}/members/${hash}`,
     {
@@ -63,7 +83,7 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  const member = (await res.json()) as any;
+  const member = (await res.json()) as MailchimpMember;
 
   if (member.status !== "subscribed") {
     return NextResponse.json(
@@ -75,11 +95,14 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  // 2) Figure out which course from tags
+  // 2) Determine the course from COURSE merge field or tags
   let course: CourseCode | null = null;
 
-  if (Array.isArray(member.tags)) {
-    const tagNames: string[] = member.tags.map((t: any) => String(t.name));
+  const mergeCourse = member.merge_fields?.COURSE?.trim();
+  if (mergeCourse && (mergeCourse in COURSE_FILES)) {
+    course = mergeCourse as CourseCode;
+  } else if (Array.isArray(member.tags)) {
+    const tagNames = member.tags.map((t) => t.name);
     const knownCourses: CourseCode[] = ["FOQIC", "Python", "DASQL", "DVPBI"];
     course = knownCourses.find((c) => tagNames.includes(c)) ?? null;
   }
@@ -93,11 +116,11 @@ export async function GET(req: NextRequest) {
 
   const file = COURSE_FILES[course];
 
-  // 3) Create the same signed token your existing download route expects
+  // 3) Create token for your existing /api/download route
   const exp = Math.floor(Date.now() / 1000) + 60 * 30; // 30 minutes
   const token = sign({ email, course, file, exp }, secret);
   const downloadUrl = `/api/download?t=${encodeURIComponent(token)}`;
 
-  // 4) Redirect so the browser immediately downloads the brochure
+  // 4) Redirect so browser immediately downloads the brochure
   return NextResponse.redirect(downloadUrl);
 }
